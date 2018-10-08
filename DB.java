@@ -250,7 +250,7 @@ public abstract class DB implements AutoCloseable, ParamSetter {
      * @param key Список имён полей, составляющих ключ синхронизации. Может быть null или пустым -- тогда используется первичный ключ.
      * @throws SQLException
      */
-    public final void upsert (Class c, Map <String, Object> record, String [] key) throws SQLException {
+    public final void upsert (Class c, Map <String, Object> record, String... key) throws SQLException {
         upsert (model.get (c), record, key);
     }            
     
@@ -261,7 +261,7 @@ public abstract class DB implements AutoCloseable, ParamSetter {
      * @param key Список имён полей, составляющих ключ синхронизации. Может быть null или пустым -- тогда используется первичный ключ.
      * @throws SQLException
      */
-    public final void upsert (Table t, Map <String, Object> record, String [] key) throws SQLException {
+    public final void upsert (Table t, Map <String, Object> record, String... key) throws SQLException {
                                 
         if (key == null || key.length == 0) key = (String []) t.getPkColNames ();
         
@@ -283,11 +283,11 @@ public abstract class DB implements AutoCloseable, ParamSetter {
      * Остальные записи при этом не затрагиваются.
      * 
      * @param c Класс описания таблицы
-     * @param record Хэш со значениями полей. Ключевые должны быть указаны, остальные -- не обязательно.
+     * @param records Хэш со значениями полей. Ключевые должны быть указаны, остальные -- не обязательно.
      * @param key Список имён полей, составляющих ключ синхронизации. Может быть null или пустым -- тогда используется первичный ключ.
      * @throws SQLException
      */
-    public final void upsert (Class c, List<Map <String, Object>> records, String [] key) throws SQLException {
+    public final void upsert (Class c, List<Map <String, Object>> records, String... key) throws SQLException {
         upsert (model.get (c), records, key);
     }            
 
@@ -304,7 +304,7 @@ public abstract class DB implements AutoCloseable, ParamSetter {
      * @param key Список имён полей, составляющих ключ синхронизации. Может быть null или пустым -- тогда используется первичный ключ.
      * @throws SQLException
      */
-    public final void upsert (Table t, List<Map <String, Object>> records, String [] key) throws SQLException {
+    public final void upsert (Table t, List<Map <String, Object>> records, String... key) throws SQLException {
         
         if (records == null || records.size () == 0) return;
                         
@@ -332,7 +332,7 @@ public abstract class DB implements AutoCloseable, ParamSetter {
      * @param key Список имён полей, составляющих ключ синхронизации. Может быть null или пустым -- тогда используется первичный ключ.
      * @throws SQLException
      */
-    public final void upsert (Class t, Stream<Map <String, Object>> records, String [] key) throws SQLException {
+    public final void upsert (Class t, Stream<Map <String, Object>> records, String... key) throws SQLException {
         upsert (t, records.collect (Collectors.toList ()), key);
     }
 
@@ -349,7 +349,7 @@ public abstract class DB implements AutoCloseable, ParamSetter {
      * @param key Список имён полей, составляющих ключ синхронизации. Может быть null или пустым -- тогда используется первичный ключ.
      * @throws SQLException
      */
-    public final void upsert (Table t, Stream<Map <String, Object>> records, String [] key) throws SQLException {
+    public final void upsert (Table t, Stream<Map <String, Object>> records, String... key) throws SQLException {
         upsert (t, records.collect (Collectors.toList ()), key);
     }
 
@@ -367,7 +367,7 @@ public abstract class DB implements AutoCloseable, ParamSetter {
      * @param key Список имён полей, составляющих ключ синхронизации. Может быть null или пустым -- тогда используется первичный ключ records.
      * @throws SQLException
      */
-    public final void upsert (Table t, Table records, String [] key) throws SQLException {
+    public final void upsert (Table t, Table records, String... key) throws SQLException {
         
         if (key == null || key.length == 0) key = t.getPkColNames ();
         
@@ -389,7 +389,7 @@ public abstract class DB implements AutoCloseable, ParamSetter {
      * @param key Список имён полей, составляющих ключ синхронизации. Может быть null или пустым -- тогда используется первичный ключ records.
      * @throws SQLException
      */
-    public final void upsert (Class t, Class records, String [] key) throws SQLException {
+    public final void upsert (Class t, Class records, String... key) throws SQLException {
         
         upsert (model.get (t), model.get (records), key);
         
@@ -1362,7 +1362,7 @@ public abstract class DB implements AutoCloseable, ParamSetter {
     protected abstract void genUpsertSql (TableSQLBuilder b, Roster<PhysicalCol> keyCols);
     protected abstract void genInsertSql (TableSQLBuilder b);
     protected abstract void genUpdateSql (TableSQLBuilder b);
-    protected abstract SQLBuilder genUpsertSql (Table t, Table records, String[] key);
+    protected abstract SQLBuilder genUpsertSql (Table t, Table records, String... key);
     protected abstract SQLBuilder genTruncateSql (Table t);
     
     /**
@@ -1584,16 +1584,16 @@ public abstract class DB implements AutoCloseable, ParamSetter {
         
         String [] key;
 
-        public UpsertBuffer (Table t, int size, String [] key) {
+        public UpsertBuffer (Table t, int size, String... key) {
             super (t, size);
             this.key = key;
         }
         
-        public UpsertBuffer (String t, int size, String [] key) {
+        public UpsertBuffer (String t, int size, String... key) {
             this (model.get (t), size, key);
         }
         
-        public UpsertBuffer (Class t, int size, String [] key) {
+        public UpsertBuffer (Class t, int size, String... key) {
             this (model.get (t), size, key);
         }
                 
@@ -1631,7 +1631,7 @@ public abstract class DB implements AutoCloseable, ParamSetter {
         String [] key;
         int cnt;
 
-        public TableUpsertBuffer (Table t, int size, Table tb, int tbSize, String [] key) throws SQLException {
+        public TableUpsertBuffer (Table t, int size, Table tb, int tbSize, String... key) throws SQLException {
             super (t, size);
             if (tbSize < size) throw new IllegalArgumentException ("tbSize (" + tbSize +  ") cannot be less than size: " + size);
             this.tbSize = tbSize;
@@ -1648,7 +1648,7 @@ public abstract class DB implements AutoCloseable, ParamSetter {
          * @param tbSize Максимальное число записей в tb
          * @param key Ключ синхронизации. Если пусто, используется первичный ключ tb
          */
-        public TableUpsertBuffer (Class t, int size, Class tb, int tbSize, String [] key) throws SQLException {
+        public TableUpsertBuffer (Class t, int size, Class tb, int tbSize, String... key) throws SQLException {
             this (model.get (t), size, model.get (tb), tbSize, key);
         }
 
