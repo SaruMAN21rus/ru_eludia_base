@@ -277,11 +277,11 @@ public class TypeConverter {
      * 
      * @return javaBean с требуемыми значениями полей
      */
-    public static final Object javaBean (Class clazz, Map<String, Object> values) {
+    public static final <T> T javaBean (Class<T> clazz, Map<String, Object> values) {
                 
         try {
             
-            Object javaBean = clazz.getConstructor ().newInstance ();
+            T javaBean = clazz.getConstructor ().newInstance ();
             
             BeanInfo info = Introspector.getBeanInfo (clazz);
             
