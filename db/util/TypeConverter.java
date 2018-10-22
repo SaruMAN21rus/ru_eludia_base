@@ -304,13 +304,13 @@ public class TypeConverter {
                 if (type.isPrimitive())
                     type = (Class)primitiveWrapperMap.get(type);
                 
-                if (value.getClass().equals(type))
-                    writeMethod.invoke(javaBean, value);
-                else if (String.class.equals (type)) {
+                if (String.class.equals (type)) {
                     final String s = value.toString ();
                     if (s.isEmpty ()) continue;
                     writeMethod.invoke (javaBean, s);
-                }
+                } 
+                else if (value.getClass().equals(type))
+                    writeMethod.invoke(javaBean, value);
                 else if (Boolean.class.equals (type)) {
                     final String s = value.toString ();
                     if (s.isEmpty ()) continue;
