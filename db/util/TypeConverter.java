@@ -391,7 +391,15 @@ public class TypeConverter {
                 
                 final Method writeMethod = pd.getWriteMethod ();
 
-                if (writeMethod == null) continue;
+                if (writeMethod == null) {
+                    final Method readMethod = pd.getReadMethod();
+                    if (!List.class.equals(readMethod.getReturnType())) continue;
+                    
+                    List list = (List)readMethod.invoke(javaBean);
+                    list.addAll((List)value);
+                    
+                    continue;
+                }
 
                 Class<?> type = writeMethod.getParameterTypes () [0];
                 
