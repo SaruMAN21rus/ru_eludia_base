@@ -18,6 +18,18 @@ public class Predicate {
     boolean orNull = false;
     Object [] values;
 
+    public Predicate (Operator operator, boolean not, boolean orNull, Object [] values) {
+        this.operator = operator;
+        this.not = not;
+        this.orNull = orNull;
+        this.values = values;
+    }
+
+    public Predicate (Operator operator, Object[] values) {
+        this.operator = operator;
+        this.values = values;
+    }
+
     public boolean isOrNull () {
         return orNull;
     }

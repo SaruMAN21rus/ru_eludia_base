@@ -79,7 +79,6 @@ public class Model extends AbstractModel<Col, Key, Table> {
                         
         try (DB db = getDb ()) {                
             db.adjustModel  ();
-            db.updateSchema ();
         }            
                        
     }

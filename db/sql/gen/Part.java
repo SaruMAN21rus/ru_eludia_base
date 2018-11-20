@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.logging.Logger;
 import ru.eludia.base.model.Col;
+import ru.eludia.base.model.ColEnum;
 import ru.eludia.base.model.Table;
 
 public abstract class Part<T extends Part> {
@@ -69,17 +70,39 @@ public abstract class Part<T extends Part> {
     }
 
     public final T and (String name, Predicate predicate) {
-        if (filters.isEmpty ()) filters = new ArrayList<> ();       
-        final Filter filter = new Filter (table, name, predicate);
-        if (!filter.isOff ()) filters.add (filter);
+        andEither (name, predicate);
         return (T) this;        
     }
 
     public final T and (String src, Object... values) {
-        if (filters.isEmpty ()) filters = new ArrayList<> ();       
-        final Filter filter = new Filter (table, src, values);
-        if (!filter.isOff ()) filters.add (filter);
+        andEither (src, values);
         return (T) this;
+    }
+    
+    public final T and (ColEnum col, Operator op, Object... values) {
+        andEither (col, op, values);
+        return (T) this;
+    }
+
+    public Filter andEither (ColEnum col, Operator op, Object... values) {
+        if (filters.isEmpty ()) filters = new ArrayList<> ();
+        final Filter filter = new Filter (this, col.getCol ().getName ().toLowerCase (), new Predicate (op, values));
+        if (!filter.isOff ()) filters.add (filter);
+        return filter;
+    }
+    
+    public Filter andEither (String name, Predicate predicate) {
+        if (filters.isEmpty ()) filters = new ArrayList<> ();       
+        final Filter filter = new Filter (this, name, predicate);
+        if (!filter.isOff ()) filters.add (filter);
+        return filter;        
+    }
+
+    public final Filter andEither (String src, Object... values) {
+        if (filters.isEmpty ()) filters = new ArrayList<> ();       
+        final Filter filter = new Filter (this, src, values);
+        if (!filter.isOff ()) filters.add (filter);
+        return filter;
     }
     
     public final T where (String src, Object... values) {

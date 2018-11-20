@@ -37,7 +37,7 @@ public abstract class Join extends Part<Join> {
     
     public final Join when (String src, Object... values) {        
         if (filters.isEmpty ()) filters = new ArrayList<> ();       
-        final Filter filter = new Filter (table, src, values);
+        final Filter filter = new Filter (this, src, values);
         if (!filter.isOff ()) {
             filter.setForJoinOnly (true);
             filters.add (filter);

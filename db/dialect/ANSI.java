@@ -9,11 +9,16 @@ import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import ru.eludia.base.DB;
 import ru.eludia.base.db.sql.build.QP;
 import ru.eludia.base.db.sql.build.TableSQLBuilder;
@@ -270,6 +275,10 @@ public abstract class ANSI extends DB {
     
     void addSelectFilter (QP qp, Part part, Filter f) {
         
+        Filter nextFilter = f.getNextFilter ();
+        
+        if (nextFilter != null) qp.append ('(');
+        
         Predicate p = f.getPredicate ();
 
         if (p.isNot ()) qp.append ("NOT(");
@@ -291,6 +300,12 @@ public abstract class ANSI extends DB {
         if (p.isOrNull ()) qp.append (')');
         
         if (p.isNot ()) qp.append (')');
+        
+        if (nextFilter != null) {
+            qp.append (" OR ");
+            addSelectFilter (qp, part, nextFilter);
+            qp.append (')');
+        }
 
     }
     
@@ -658,16 +673,53 @@ public abstract class ANSI extends DB {
         
     }
     
+    private static final Pattern RE_FIELD = Pattern.compile ("(\"[A-Za-z_][A-Za-z0-9_]*\")");
+    
     @Override
     public final void adjustTable (Table t) {
         
         t.setModel (model);
-                
+
+        Map<String, PhysicalCol> physicalVirtualCols = new HashMap<> ();
+
         for (Col c: t.getColumns ().values ()) {
             c.setTable (t);
             adjustCol (c);
+            PhysicalCol phy = c.toPhysical ();
+            if (phy.isVirtual ()) physicalVirtualCols.put ('"' + phy.getName ().toUpperCase () + '"', phy);
         }
-        
+
+        int tries = physicalVirtualCols.size ();
+
+        for (int n = 0; n < tries; n ++) {
+
+            boolean found = false;
+
+            for (PhysicalCol v: physicalVirtualCols.values ()) {
+
+                String def = v.getDef ();
+
+                Matcher m = RE_FIELD.matcher (def);
+                
+                while (m.find ()) {
+                    String key = m.group ().toUpperCase ();
+                    if (!physicalVirtualCols.containsKey (key)) continue;
+                    def = def.replace (m.group (), physicalVirtualCols.get (key).getDef ());
+                    found = true;
+                }
+
+                if (!found) continue;
+
+                logger.info (t.getName () + '.' + v.getName () + ": " + v.getDef () + " .. " + def);
+
+                v.setDef (def);
+
+            }
+
+            if (!found) break;
+
+        }
+
     }
 
     private final void adjustCol (Col col) {
@@ -765,7 +817,7 @@ public abstract class ANSI extends DB {
         
         for (Table t: tables) updateData (t);        
         
-        for (View v: views) update (v);
+        updateViews (views);        
         
         for (Ref ref: newRefs) create (ref);
         
@@ -773,6 +825,43 @@ public abstract class ANSI extends DB {
 
         checkModel ();
 
+    }
+
+    private void updateViews (List<View> views) throws SQLException {
+        
+        int tries = views.size ();
+        
+        if (tries == 0) return;
+        
+        SQLException lastException = null;
+        
+        Set<View> passed = new HashSet (tries);
+        
+        for (int i = 0; i < tries; i ++) {
+            
+            lastException = null;
+
+            for (View v: views) {
+                
+                if (passed.contains (v)) continue;
+                
+                try {
+                    update (v);
+                    passed.add (v);
+                }
+                catch (SQLException e) {
+                    logger.warning ("Exception occured, will retry with " + v.getName () + ". The message was " + e.getMessage ());
+                    lastException = e;                    
+                }
+                
+            }
+
+            if (lastException == null) return;
+            
+        }
+        
+        throw lastException;
+        
     }
 
     public void updateSchema () throws SQLException {

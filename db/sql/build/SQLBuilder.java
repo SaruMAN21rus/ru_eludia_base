@@ -141,7 +141,7 @@ public abstract class SQLBuilder {
         st.execute ();
     }    
     
-    private static void setLastChar (StringBuilder b, char c) {
+    public static void setLastChar (StringBuilder b, char c) {
         b.setCharAt (b.length () - 1, c);
     }
     

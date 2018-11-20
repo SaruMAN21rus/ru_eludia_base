@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import ru.eludia.base.model.ColEnum;
 import ru.eludia.base.model.Trigger;
 
 public abstract class AbstractTable<C extends AbstractCol, K extends AbstractKey> extends NamedObject {
@@ -33,6 +34,10 @@ public abstract class AbstractTable<C extends AbstractCol, K extends AbstractKey
         super (name, remark);
     }
     
+    public C getColumn (ColEnum c) {
+        return columns.get (c.lc ());
+    }
+    
     public C getColumn (String name) {
         return columns.get (name);
     }
@@ -46,6 +51,12 @@ public abstract class AbstractTable<C extends AbstractCol, K extends AbstractKey
     }
     
     Collection<String> keyColNames = Collections.EMPTY_LIST;
+    
+    public final void pk (ColEnum c, String... aliases) {
+        final C column = getColumn (c);
+        if (column == null) throw new IllegalArgumentException ("Column " + c + " not found in " + this.getName () + ". Existing column names are " + getColumns ().keySet ());
+        pk (column, aliases);
+    }
     
     public final void pk (C c, String... aliases) {
         

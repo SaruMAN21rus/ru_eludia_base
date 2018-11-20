@@ -4,4 +4,8 @@ public interface ColEnum {
     
     Col getCol ();
     
+    default String lc () {
+        return this.toString ().toLowerCase ();
+    }
+    
 }
