@@ -776,9 +776,9 @@ public final class Oracle extends ANSI {
             logger.log (Level.SEVERE, "Cannot PURGE RECYCLEBIN", ex);
         }
         
-        forFirst (new QP ("SELECT NAME, TEXT, TYPE FROM USER_ERRORS"), rs -> {
+        /*forFirst (new QP ("SELECT NAME, TEXT, TYPE FROM USER_ERRORS"), rs -> {
             throw new IllegalStateException (rs.getString ("TYPE") + " " + rs.getString ("NAME") + ": " + rs.getString ("TEXT"));
-        });
+        });*/
         
     };
     
